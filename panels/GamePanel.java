@@ -226,14 +226,15 @@ public class GamePanel extends BasePanel implements Runnable, ComponentListener 
         // BACKGROUND IMAGE
         final Image img = utilityTool.loadImage("static/image/components/snake_hat_medium.png");
 
-        // ADVENTURE LIMITS
-        static final int maxAdventureScore = 200;
-
         // NORMAL GAME MODE SCORING
         ArrayList<Integer> scores;
         ScoreTable scoreTable;
 
         // ADVENTURE GAME MODE SCORING
+        static final int tacoGoal = 20;
+        int tacoCount = 0;
+        JLabel levelLabel;
+        JLabel tacoLabel;
         JLabel timeLabel;
 
         int numberOfSnakes;
@@ -242,17 +243,23 @@ public class GamePanel extends BasePanel implements Runnable, ComponentListener 
 
             setPreferredSize(new Dimension(scorePanelWidth, screenHeight));
 
-            // ADD TABLE TO PANEL
-            scoreTable = new ScoreTable(numberOfSnakes);
-            add(scoreTable.getTableInScrolllPane());
-
-            // ADD TIMER
             if (gameSettings.adventure) {
+                setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+                levelLabel = new JLabel("LEVEL " + Integer.toString(gameSettings.mapIndex + 1));
+                tacoLabel = new JLabel(String.format("%s / %s", tacoCount, tacoGoal));
                 timeLabel = new JLabel(timer.getRuntime());
+                levelLabel.setAlignmentX(JLabel.CENTER_ALIGNMENT);
+                tacoLabel.setAlignmentX(JLabel.CENTER_ALIGNMENT);
+                timeLabel.setAlignmentX(JLabel.CENTER_ALIGNMENT);
+                add(levelLabel);
+                add(tacoLabel);
                 add(timeLabel);
+            } else {
+                scoreTable = new ScoreTable(numberOfSnakes);
+                add(scoreTable.getTableInScrolllPane());
+                scores = new ArrayList<Integer>(Collections.nCopies(numberOfSnakes, 0));
             }
 
-            scores = new ArrayList<Integer>(Collections.nCopies(numberOfSnakes, 0));
             this.numberOfSnakes = numberOfSnakes;
         
         }
@@ -260,22 +267,30 @@ public class GamePanel extends BasePanel implements Runnable, ComponentListener 
         public ScoreTable getScoreTable() { return scoreTable; }
 
         public boolean isGameOver() {
-            // GAME ENDS IF A SNAKE HAS REACHED THE MAX SCORE. THIS FUNCTION IS ONLY CALLED
-            // WHEN THE GAME IS IN ADVENTURE MODE
-            return scores.contains(maxAdventureScore);
+
+            // THIS FUNCTION IS ONLY CALLED WHEN THE GAME IS IN ADVENTURE MODE
+            return tacoCount == tacoGoal;
 
         }
 
         public void update() {
 
-            // IF IN ADVENTURE MODE, UPDATE THE TIMER
+            // IF IN ADVENTURE MODE, ALWAYS UPDATE THE TIMER
             if (gameSettings.adventure) {
+                
                 timeLabel.setText(timer.getRuntime());
-            }
 
-            // UPDATE SCORES WHEN AT LEAST ONE SNAKE HAS EATEN
-            if (boardStatus.hasEaten) {
+                if (boardStatus.hasEaten) {
+                    tacoCount++;
+                    tacoLabel.setText(String.format("%s / %s", tacoCount, tacoGoal));
+                    // RESET FOOD STATUS TO FALSE  
+                    boardStatus.snakeFoodStatus.set(0, false);
+                }
+            
+            } else if (boardStatus.hasEaten) {
+                // UPDATE SCORES WHEN AT LEAST ONE SNAKE HAS EATEN AND NOT IN ADVENTURE MODE    
                 updateScores();
+            
             }
 
         }
