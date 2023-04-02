@@ -2,6 +2,10 @@ package utilityTool;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import javax.swing.ImageIcon;
 
 public class UtilityTool {
   
@@ -14,6 +18,14 @@ public class UtilityTool {
         g2.drawImage(img, 0, 0, width, height, null);
         return scaledImg;
 
+    }
+
+    public Image loadImage(String imgPath) {
+        
+        Path relativePath = Paths.get(imgPath);
+        Path absolutePath = relativePath.toAbsolutePath();
+        return new ImageIcon(absolutePath.toString()).getImage();
+    
     }
 
     public void drawWindow(int x, int y, int width, int height, Graphics2D g2) {

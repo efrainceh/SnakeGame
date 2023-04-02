@@ -1,21 +1,16 @@
 package panels;
 
 import java.awt.*;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
 import javax.swing.*;
 
 import main.GameSettings;
 import panels.CardPanel.PanelHandler;
 
+
 public class GridPanel extends BasePanel {
 
     // BACKGROUND IMAGE
-    static final String imgPath = "static/image/components/snake_hat_large.png";
-    static Path relativePath = Paths.get(imgPath);
-    static Path absolutePath = relativePath.toAbsolutePath();
-    static final Image img = new ImageIcon(absolutePath.toString()).getImage();
+    final Image img = utilityTool.loadImage("static/image/components/snake_hat_large.png");
  
     // SCREEN LAYOUT. ONLY USED WHEN setGridPanel IS CALLED.
     JPanel titlePanel;
@@ -23,9 +18,7 @@ public class GridPanel extends BasePanel {
     JPanel footPanel;
     GridBagConstraints gbc;
 
-    protected GridPanel() {
-
-    };
+    protected GridPanel() {};
 
     protected GridPanel(PanelHandler panelHandler, GameSettings gameSettings) {
 

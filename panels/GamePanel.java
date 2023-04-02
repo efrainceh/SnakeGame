@@ -3,8 +3,6 @@ package panels;
 import java.awt.*;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 import javax.swing.*;
 
@@ -13,7 +11,6 @@ import customComponents.*;
 import food.*;
 import main.*;
 import snake.*;
-//import utilityTool.UtilityTool;
 import panels.CardPanel.PanelHandler;
 
 
@@ -212,10 +209,7 @@ public class GamePanel extends BasePanel implements Runnable, ComponentListener 
     public class ScorePanel extends JPanel {
 
         // BACKGROUND IMAGE
-        final String imgPath = "static/image/components/snake_hat_medium.png";
-        Path relativePath = Paths.get(imgPath);
-        Path absolutePath = relativePath.toAbsolutePath();
-        final Image img = new ImageIcon(imgPath).getImage();
+        final Image img = utilityTool.loadImage("static/image/components/snake_hat_medium.png");
 
         // ADVENTURE LIMITS
         static final int maxAdventureScore = 200;

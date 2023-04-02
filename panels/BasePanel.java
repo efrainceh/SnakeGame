@@ -5,6 +5,7 @@ import javax.swing.*;
 
 import main.GameSettings;
 import panels.CardPanel.PanelHandler;
+import utilityTool.UtilityTool;
 
 public class BasePanel extends JPanel {
 
@@ -20,6 +21,9 @@ public class BasePanel extends JPanel {
     static final int screenHeight = tileSize * tilesPerRow;
     static final int screenWidth = tileSize * (tilesPerCol + tilesInScorePanel);
     
+    // UTILITY
+    UtilityTool utilityTool = new UtilityTool();
+
     // USED TO HANDLE MOVING BETWEEN PANELS
     PanelHandler panelHandler;
 
