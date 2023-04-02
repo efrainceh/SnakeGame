@@ -16,13 +16,6 @@ import panels.CardPanel.PanelHandler;
 
 public class GamePanel extends BasePanel implements Runnable, ComponentListener {
 
-    static BoardStatus boardStatus;
-    static GameTimer timer;
-
-    ScorePanel scorePanel;
-    BoardPanel boardPanel;
-    Thread gameThread;
-
     // PANEL SETTINGS
     static final int scorePanelWidth = tileSize * tilesInScorePanel;
     static final int boardPanelWidth = tileSize * tilesPerCol;
@@ -36,7 +29,17 @@ public class GamePanel extends BasePanel implements Runnable, ComponentListener 
     // GAME STATUS
     static final int hold = 0;
     static final int running = 1;
+    static final int gameOver = 2;
+    static final int nextLevel = 3;
+    static final int finished = 4;
     int gameStatus = 0;
+
+    static BoardStatus boardStatus;
+    static GameTimer timer;
+
+    ScorePanel scorePanel;
+    BoardPanel boardPanel;
+    Thread gameThread;
 
     public GamePanel(PanelHandler panelHandler, GameSettings gameSettings) {
 
@@ -100,6 +103,12 @@ public class GamePanel extends BasePanel implements Runnable, ComponentListener 
             // ADVENTURE MODE EVALUATION
             if (gameSettings.adventure) {
 
+                // ADD WAIT TIME TO DISPLAY THE LEVEL WINDOW AT THE BEGGINING OF EACH ADVENTURE MAP
+                if (gameStatus == hold) {
+                    hold(2);
+                    gameStatus = running;
+                }
+
                 // START THE TIMER ONLY ONCE, AFTER A VALID KEY HAS BEEN PRESSED
                 if (boardPanel.gameStarted() && timer.hasNotStarted()) {
                     timer.start();
@@ -136,6 +145,20 @@ public class GamePanel extends BasePanel implements Runnable, ComponentListener 
 
     }
 
+    private void hold(int seconds) {
+
+        try {
+
+            Thread.sleep(3000);
+
+        } catch(InterruptedException e) {
+
+            e.printStackTrace();
+
+        }
+
+    }
+
     private void updateRunSettings() {
 
         currentTime = System.nanoTime();
@@ -157,39 +180,31 @@ public class GamePanel extends BasePanel implements Runnable, ComponentListener 
     }
 
     private void setEndGame() {
-        
-        try {
 
-            Thread.sleep(1000);             // WAIT A SECOND SO THAT YOU CAN SEE HOW THE GAME ENDED
-            gameThread = null;
-            gameSettings.scoreTable = scorePanel.getScoreTable();
-            panelHandler.goEnd(gameSettings);
-        
-        } catch(InterruptedException e) {
-            e.printStackTrace();
-        }
+        gameStatus = gameOver;
+        gameThread = null;
+        gameSettings.scoreTable = scorePanel.getScoreTable();
+        hold(2);
+        panelHandler.goEnd(gameSettings);
         
     }
 
     private void nextMap() {
 
-        try {
-
-            Thread.sleep(1000);             // WAIT A SECOND SO THAT YOU CAN SEE HOW THE GAME ENDED
-            gameThread = null;
-            gameSettings.scoreTable = scorePanel.getScoreTable();
-
-            // GO TO NEXT MAP, OR THE END IF IT WAS THE LAST MAP
-            int numberOfMaps = boardPanel.getNumberOfMaps();
-            if (gameSettings.mapIndex < numberOfMaps - 1) {
-                gameSettings.mapIndex++;
-                panelHandler.goGame(gameSettings);
-            } else {
-                panelHandler.goEnd(gameSettings);
-            }
-        
-        } catch(InterruptedException e) {
-            e.printStackTrace();
+        gameThread = null;
+        gameSettings.scoreTable = scorePanel.getScoreTable();
+    
+        // GO TO NEXT MAP, OR THE END IF IT WAS THE LAST MAP
+        int numberOfMaps = boardPanel.getNumberOfMaps();
+        if (gameSettings.mapIndex < numberOfMaps - 1) {
+            gameSettings.mapIndex++;
+            gameStatus = nextLevel;
+            hold(2);
+            panelHandler.goGame(gameSettings);
+        } else {
+            gameStatus = finished;
+            hold(2);
+            panelHandler.goEnd(gameSettings);
         }
 
     }
@@ -214,10 +229,14 @@ public class GamePanel extends BasePanel implements Runnable, ComponentListener 
         // ADVENTURE LIMITS
         static final int maxAdventureScore = 200;
 
+        // NORMAL GAME MODE SCORING
         ArrayList<Integer> scores;
         ScoreTable scoreTable;
-        int numberOfSnakes;
+
+        // ADVENTURE GAME MODE SCORING
         JLabel timeLabel;
+
+        int numberOfSnakes;
         
         public ScorePanel(int numberOfSnakes) {
 
@@ -301,9 +320,6 @@ public class GamePanel extends BasePanel implements Runnable, ComponentListener 
         ArrayList<Snake> snakes;
         ArrayList<Boolean> snakeFoodStatus;
 
-        // LEVEL WINDOW COUNTER
-        int counter = 0;
-
         public BoardPanel(int mapIndex, int numberOfPlayers) {
 
             setPreferredSize(new Dimension(boardPanelWidth, screenHeight));
@@ -322,24 +338,20 @@ public class GamePanel extends BasePanel implements Runnable, ComponentListener 
                 addSnake(13, 8, new String[] {"W", "S", "D", "A"});
             }
 
-            // ADD FOOD TO BOARD. foodUpdate PLACES FOOD IN A RANDOM NO COLLISION TILE. HOWEVER, OCCASIONALLY
-            // FOOD IS PLACED IN THE CURRENT HEAD SNAKE POSITION (SINCE HEAD COLLISION IS FALSE). THIS
-            // WHILE LOOP PREVENTS THAT
-            food = foodManager.updateFood();
-            while (foodIsInSnakeHeadTile()) {
-                food = foodManager.updateFood();
-            }
-            board.addFood(food);
+            // ADD FOOD TO BOARD.
+            addFood();
 
         }
 
         public boolean foodIsInSnakeHeadTile() {
+
             for (Snake snake : snakes) {
                 if (food.row == snake.getHeadRow() && food.col == snake.getHeadCol()) {
                     return true;
                 }
             }
             return false;
+
         }
 
         public int getNumberOfRows() { return tilesPerCol; }
@@ -351,17 +363,32 @@ public class GamePanel extends BasePanel implements Runnable, ComponentListener 
         public void addSnake(int startRow, int startCol, String[] keys) {
 
             // Add snake to boardpanel
-            // Order of keys: up, down, right, left
+            // ORDER OF KEYS: UP, DOWN, RIGHT, LEFT
             Snake snake = new Snake(this, startRow, startCol);
             snake.addKeyHandler(keys);    
             snakes.add(snake);
             snakeFoodStatus.add(false);
 
-            // Update board tiles as Collision. Snake's head tile position on the board remains as false collision
+            // UPDATE BOARD TILES AS COLLISION. SNAKE'S HEAD TILE POSITION ON THE BOARD
+            // REMAINS SET AS COLLISION FALSE
             LinkedList<SnakePart> snakeParts = snake.getSnakeParts();
             for (int partIx = 1; partIx < snakeParts.size(); partIx++) {
                 board.updateCell(snakeParts.get(partIx), true);
             }
+
+        }
+
+        private void addFood() {
+
+            // foodUpdate PLACES FOOD IN A RANDOM NO COLLISION TILE. HOWEVER, OCCASIONALLY FOOD IS
+            // PLACED IN THE CURRENT HEAD SNAKE POSITION (SINCE HEAD COLLISION IS SET TO FALSE). THIS
+            // WHILE LOOP PREVENTS THAT
+
+            food = foodManager.updateFood();
+            while (foodIsInSnakeHeadTile()) {
+                food = foodManager.updateFood();
+            }
+            board.addFood(food);
 
         }
 
@@ -373,8 +400,7 @@ public class GamePanel extends BasePanel implements Runnable, ComponentListener 
 
             boolean haveEaten = snakesHaveEaten();
             if (haveEaten) {
-                food = foodManager.updateFood();
-                board.addFood(food);         // New food tile is labeled FOOD
+                addFood();
             }
             snakesUpdate();
             boardStatus.update(haveEaten, snakeFoodStatus, food.getPoints());       // NEED TO CHECK THIS FUNCTION
@@ -382,6 +408,7 @@ public class GamePanel extends BasePanel implements Runnable, ComponentListener 
 
         private boolean snakesHaveEaten() {
 
+            // RETURNS TRUE IF AT LEAST ONE SNAKE HAS EATEN THE FOOD
             boolean oneSnakeAte = false;
             for (int snakeIx = 0; snakeIx < snakes.size(); snakeIx++) {
                 if (snakes.get(snakeIx).ate()) {
@@ -410,14 +437,20 @@ public class GamePanel extends BasePanel implements Runnable, ComponentListener 
 
             super.paintComponent(g);
             Graphics2D g2 = (Graphics2D)g;
-            
+                        
             // long s = System.nanoTime();
 
             board.draw(g2);
             foodManager.draw(g2);
             drawSnakes(g2);
-            drawLevelWindow(g2);
 
+            // DRAW BEGGINING AND END OF GAME WINDOWS
+            if (gameSettings.adventure && gameStatus == hold) {
+                String text = "LEVEL " + Integer.toString(board.getMapIndex() + 1);
+                drawTextWindow(g2, text);
+            }
+            drawEndWindow(g2);
+           
             // long e = System.nanoTime();
             // System.out.println(e-s);
 
@@ -425,63 +458,41 @@ public class GamePanel extends BasePanel implements Runnable, ComponentListener 
 
         }
 
-        private void drawLevelWindow(Graphics2D g2) {
-            if (gameSettings.adventure && gameStatus == hold) {
-                // int x = (int) (boardPanelWidth * 0.25);
-                // int y = (int) (screenHeight * 0.35);
-                // int width = (int) (boardPanelWidth * 0.5);
-                // int height = (int) (screenHeight * 0.3);
-                //utilityTool.drawWindow(x, y, width, height, g2);
-
-                // THIS DRAWS THE WINDOW FOR APPROXIMATELY 3 SECONDS AFTER THE PANEL IS SHOWN
-                counter++;
-                double ratio = counter / (double)gameSettings.FBS;
-                if (ratio == 1.5) {
-                    gameStatus = running;
-                }
-                
-            }
-        }
-
-        // private void drawWindow(Graphics2D g2) {
-
-        //     int x = (int) (boardPanelWidth * 0.25);
-        //     int y = (int) (screenHeight * 0.35);
-        //     int width = (int) (boardPanelWidth * 0.5);
-        //     int height = (int) (screenHeight * 0.3);
-
-        //     // DISPLAYED RECTANGLE
-        //     g2.setColor(new Color(255, 255, 255, 150));
-        //     g2.fillRoundRect(x, y, width, height, 35, 35);
-
-        //     // BORDER
-        //     g2.setColor(Color.RED);
-        //     g2.setStroke(new BasicStroke(5));
-        //     g2.drawRoundRect(x, y, width, height, 25, 25);
-
-        //     // TEXT
-        //     int xText = x + (int)(tileSize * 1.2);
-        //     int yText = y + tileSize/2 + height/2;
-        //     g2.setColor(Color.RED);
-        //     g2.setFont(g2.getFont().deriveFont(Font.BOLD, 50));
-        //     String message;
-        //     if (board.isLastMap()) {
-        //         message = "FINAL";
-        //         g2.drawString(message, xText + 10, y + height/2 - 5);
-        //         message = "LEVEL!";
-        //         g2.drawString(message, xText + 10, y + height/2 + 50 - 5);
-        //     } else {
-        //         message = "LEVEL " + Integer.toString(board.getMapIndex() + 1);
-        //         g2.drawString(message, xText, yText);
-        //     }
-
-        // }
-
         private void drawSnakes(Graphics2D g2) {
 
             for (Snake snake : snakes) {
                 snake.draw(g2);
             }
+
+        }
+
+        private void drawEndWindow(Graphics2D g2) {
+
+            switch (gameStatus) {
+                case gameOver:
+                    drawTextWindow(g2, "GAME OVER");
+                    break;
+                case nextLevel:
+                    drawTextWindow(g2, "NEXT LEVEL");
+                    break;
+                case finished:
+                    drawTextWindow(g2, "YOU WIN!");
+                    break;
+                default:
+                    // Nothing is drawn
+                    break;
+            }
+
+        }
+
+        private void drawTextWindow(Graphics2D g2, String text) {
+
+            // RECTANGLE POSITION AND SIZE
+            int x = (int) (boardPanelWidth * 0.25);
+            int y = (int) (screenHeight * 0.35);
+            int width = (int) (boardPanelWidth * 0.5);
+            int height = (int) (screenHeight * 0.3);
+            utilityTool.drawRect(g2, x, y, width, height, text);
 
         }
     
@@ -491,18 +502,25 @@ public class GamePanel extends BasePanel implements Runnable, ComponentListener 
 
         public boolean gameStarted() {
 
-            return snakes.get(0).isMoving();
+            for (Snake snake : snakes) {
+                if (snake.isMoving())
+                    return true;
+                }
+            return false;
         
         }
 
         private Snake isGameOver() {
-            // In a multiplayer game, I want to know which snake had a collision in order to deduct points in the future
+
+            // IN A MULTIPLAYER GAME, I WANT TO KNOW WHICH SNAKE HAD A COLLISION SO THAT THE PLAYER
+            // CAN BE PENALIZED IN THE FUTURE
             for (Snake snake : snakes) {
                 if (snake.isOutOfPanel() || snake.collided()) {
                     return snake;
                 }
             }
             return null;
+
         }
 
     }
