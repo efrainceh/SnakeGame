@@ -77,6 +77,7 @@ public class GamePanel extends BasePanel implements Runnable, ComponentListener 
     public void componentShown(ComponentEvent e) {
 
         startGameThread();
+        playMusic(0);
         
     }
 
@@ -185,6 +186,7 @@ public class GamePanel extends BasePanel implements Runnable, ComponentListener 
         gameThread = null;
         gameSettings.scoreTable = scorePanel.getScoreTable();
         hold(2);
+        stopMusic();
         panelHandler.goEnd(gameSettings);
         
     }
@@ -193,17 +195,19 @@ public class GamePanel extends BasePanel implements Runnable, ComponentListener 
 
         gameThread = null;
         gameSettings.scoreTable = scorePanel.getScoreTable();
-    
+
         // GO TO NEXT MAP, OR THE END IF IT WAS THE LAST MAP
         int numberOfMaps = boardPanel.getNumberOfMaps();
         if (gameSettings.mapIndex < numberOfMaps - 1) {
             gameSettings.mapIndex++;
             gameStatus = nextLevel;
             hold(2);
+            stopMusic();
             panelHandler.goGame(gameSettings);
         } else {
             gameStatus = finished;
             hold(2);
+            stopMusic();
             panelHandler.goEnd(gameSettings);
         }
 
@@ -220,6 +224,22 @@ public class GamePanel extends BasePanel implements Runnable, ComponentListener 
         }
 
     }
+
+    private void playMusic(int soundIx) {
+
+        soundHandler.setFile(soundIx);
+        soundHandler.play();
+        soundHandler.loop();
+
+    }
+
+    private void stopMusic() {
+
+        soundHandler.stop();
+
+    }
+
+   
 
     public class ScorePanel extends JPanel {
 

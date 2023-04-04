@@ -85,7 +85,6 @@ public class Board {
         for (int row = 0; row < numberOfRows; row++) {
             for (int col = 0; col < numberOfCols; col++) {
                 int tileNum = mapTileNum[col][row];
-                // board[row][col] = tiles.get(tileNum).collision;
                 board[row][col] = tileManager.getTile(tileNum).collision;
             }
         }
@@ -136,10 +135,8 @@ public class Board {
 
         for (int col = 0; col < numberOfCols; col++) {
             int tileNum = mapTileNum[col][row];
-            // Cell tile = tiles.get(tileNum);
             Tile tile = tileManager.getTile(tileNum);
             int size = gp.getTileSize();
-            // g2.drawImage(tile.img, col * size, row * size, size, size, null);
             g2.drawImage(tile.img, col * size, row * size, null);
         }
 

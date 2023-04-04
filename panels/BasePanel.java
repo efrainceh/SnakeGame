@@ -4,6 +4,7 @@ import java.awt.*;
 import javax.swing.*;
 
 import main.GameSettings;
+import main.SoundHandler;
 import panels.CardPanel.PanelHandler;
 import utilityTool.UtilityTool;
 
@@ -21,8 +22,9 @@ public class BasePanel extends JPanel {
     static final int screenHeight = tileSize * tilesPerRow;
     static final int screenWidth = tileSize * (tilesPerCol + tilesInScorePanel);
     
-    // UTILITY
+    // TOOLS
     UtilityTool utilityTool = new UtilityTool();
+    SoundHandler soundHandler = new SoundHandler();
 
     // USED TO HANDLE MOVING BETWEEN PANELS
     PanelHandler panelHandler;
