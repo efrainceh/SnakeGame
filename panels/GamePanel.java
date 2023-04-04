@@ -401,6 +401,7 @@ public class GamePanel extends BasePanel implements Runnable, ComponentListener 
             // ORDER OF KEYS: UP, DOWN, RIGHT, LEFT
             Snake snake = new Snake(this, startRow, startCol);
             snake.addKeyHandler(keys);    
+            snake.scaleImages(tileSize, tileSize);
             snakes.add(snake);
             snakeFoodStatus.add(false);
 

@@ -40,8 +40,9 @@ public class SoundHandler {
             return new File(path).toURI().toURL();
 
         } catch (MalformedURLException e) {
-            // TODO Auto-generated catch block
+        
             e.printStackTrace();
+        
         }
         return null;
 
