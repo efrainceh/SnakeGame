@@ -14,6 +14,7 @@ public class LevelPanel extends GridPanel {
     static final GameButton slowBtn = new GameButton("TURTLE");
     static final GameButton mediumBtn = new GameButton("SNAKE");
     static final GameButton fastBtn = new GameButton("FALCON");
+    static final JCheckBox npc = new JCheckBox("Add PC Snake");
 
     // LEVEL SETTINGS
     static final int slowFBS = 4;
@@ -26,12 +27,16 @@ public class LevelPanel extends GridPanel {
         setGridPanel(0.20, 0.60);
         addTitle(title);
         addToCenterPanel(new GameButton[]{slowBtn, mediumBtn, fastBtn});
-
+        if (gameSettings.numberOfPlayers == 1) {
+            addToFooter(npc);
+        }
+        
         slowBtn.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
                 gameSettings.FBS = slowFBS;
+                addCheckBoxStatus();
                 panelHandler.goGame(gameSettings);
             }
 
@@ -42,6 +47,7 @@ public class LevelPanel extends GridPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 gameSettings.FBS = mediumFBS;
+                addCheckBoxStatus();
                 panelHandler.goGame(gameSettings);
             }
 
@@ -52,10 +58,19 @@ public class LevelPanel extends GridPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 gameSettings.FBS = fastFBS;
+                addCheckBoxStatus();
                 panelHandler.goGame(gameSettings);
             }
 
         });
+
+    }
+
+    private void addCheckBoxStatus() {
+
+        if (npc.isSelected()) {
+            gameSettings.npc = true;
+        }
 
     }
 

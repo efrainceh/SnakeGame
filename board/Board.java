@@ -19,8 +19,8 @@ public class Board {
     int mapIndex;
     int numberOfRows;
     int numberOfCols;
-    int mapTileNum[][];
-    Boolean board[][];
+    int[][] mapTileNum;
+    boolean[][] board;
     int foodRow;
     int foodCol;
 
@@ -31,7 +31,7 @@ public class Board {
         this.numberOfRows = rows;
         this.numberOfCols = cols;
         this.mapTileNum = new int[gp.getNumberOfCols()][gp.getNumberOfRows()];
-        this.board = new Boolean[gp.getNumberOfCols()][gp.getNumberOfRows()];
+        this.board = new boolean[gp.getNumberOfCols()][gp.getNumberOfRows()];
         tileManager.scaleImages(gp.getTileSize(), gp.getTileSize());
         loadMap(mapIndex);
         loadBoard();
@@ -40,6 +40,7 @@ public class Board {
 
     public int getNumberOfMaps() { return mapPaths.size(); }
     public int getMapIndex() { return mapIndex; }
+    public boolean[][] getBoard() { return board; }
     public boolean isLastMap() { return mapIndex == mapPaths.size() - 1; }
 
     private static ArrayList<String> loadMapPaths(String folderPath) {

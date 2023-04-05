@@ -98,6 +98,15 @@ public class GridPanel extends BasePanel {
 
     }
 
+    public void addToFooter(JComponent component) {
+
+        if (footPanel == null) {
+            return;                  // NEED TO HANDLE THROW HERE
+        }
+        footPanel.add(component);
+
+    }
+
     public void paintComponent(Graphics g) {
         g.drawImage(img,(int)(screenWidth * 0.6), (int)(screenHeight * 0.30), null);
         g.drawImage(img,(int)(screenWidth * 0.0), (int)(screenHeight * 0.30), null);

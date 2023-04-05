@@ -49,6 +49,17 @@ public class CardPanel extends BasePanel {
 
         public void goLevel() {
 
+            // THIS IS NEEDED BECAUSE THE CHECKBOX IN LEVEL PANEL SHOULD
+            // ONLY APPEAR WHEN THERE IS ONLY ONE PLAYER
+
+            // DELETE THE EXISTING LEVEL PANEL.
+            JPanel currentLevelPanel = panelMap.get("LEVEL");
+            CardPanel.this.remove(currentLevelPanel);
+
+            // CREATE AND LOAD A NEW LEVEL PANEL
+            LevelPanel levelPanel = new LevelPanel(panelHandler, gameSettings);
+            CardPanel.this.add(levelPanel, "LEVEL");
+            panelMap.put("LEVEL", levelPanel);
             cardLayout.show(CardPanel.this, "LEVEL");
 
         }

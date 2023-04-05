@@ -10,6 +10,7 @@ public class ScoreTable extends JTable{
     static final String[] columnNames = {"PLAYER", "SCORE"};
     
     int numberOfPlayers;
+    boolean npc;
 
     public ScoreTable() {
 
@@ -17,10 +18,11 @@ public class ScoreTable extends JTable{
 
     }
     
-    public ScoreTable(int numberOfPlayers) {
+    public ScoreTable(int numberOfPlayers, boolean npc) {
 
         super(numberOfPlayers, columnNames.length);
         this.numberOfPlayers = numberOfPlayers;
+        this.npc = npc;
         addColumnHeaders();
         addTableData();
         customizeTable();
@@ -54,6 +56,10 @@ public class ScoreTable extends JTable{
             setValueAt(Integer.toString(initialScore), player, 1);
         }
 
+        if (npc) {
+            DefaultTableModel model = (DefaultTableModel)getModel();
+            model.addRow(new Object[]{"PC", Integer.toString(initialScore)});
+        }
     }
 
     private void customizeTable() {

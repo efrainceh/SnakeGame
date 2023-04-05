@@ -56,6 +56,7 @@ public class Snake {
     public int getTailRow() { return snake.getLast().row; }
     public int getTailCol() { return snake.getLast().col; }
     public boolean isMoving() { return isMoving; }
+    public void setMoving(boolean isMoving) { this.isMoving = isMoving; }
 
 
     private static HashMap<Direction, SnakePart> loadDirMap(String folderPath, boolean hasCorners) {
@@ -99,21 +100,21 @@ public class Snake {
 
     }
 
-    private void addPart(String hbt, Direction direction, int row, int col) {
+    protected void addPart(String hbt, Direction direction, int row, int col) {
 
         SnakePart part = getPart(hbt, direction, row, col);
         snake.add(part);
 
     }
 
-    private void setPart(String hbt, Direction direction, int row, int col, int snakeIndex) {
+    protected void setPart(String hbt, Direction direction, int row, int col, int snakeIndex) {
 
         SnakePart part = getPart(hbt, direction, row, col);
         snake.set(snakeIndex, part);
 
     }
 
-    private SnakePart getPart(String hbt, Direction direction, int row, int col) {
+    protected SnakePart getPart(String hbt, Direction direction, int row, int col) {
 
         SnakePart part = null;
         switch (hbt){
@@ -165,7 +166,7 @@ public class Snake {
         
     }
 
-    private void grow() {
+    protected void grow() {
 
         // ADD A NEW SNAKEBODY AT THE END OF SNAKE
         SnakePart currentTail = new SnakePart(snake.getLast());
@@ -230,6 +231,7 @@ public class Snake {
         } else {
             setCornerPart(currentHead, newHead, 1);
         }
+        board.updateCell(currentHead.row, currentHead.col, true);
 
         // ONLY AFTER MOVING THE SNAKE DO WE UPDATE THE BOARD OLD TAIL TILE
         board.updateCell(tail.row, tail.col, false);
@@ -265,7 +267,7 @@ public class Snake {
 
     }
 
-    private void setCornerPart(SnakePart currentHead, SnakePart newHead, int snakeIndex) {
+    protected void setCornerPart(SnakePart currentHead, SnakePart newHead, int snakeIndex) {
 
         Direction dir = null;
         Direction currentDir = currentHead.getDirection();

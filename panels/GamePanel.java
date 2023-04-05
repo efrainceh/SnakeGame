@@ -23,6 +23,7 @@ public class GamePanel extends BasePanel implements Runnable, ComponentListener 
     // RUN SETTINGS 
     double drawInterval = 1000000000/gameSettings.FBS;
     double delta = 0;
+    double deltaNPC = 0;
     long lastTime = 0;
     long currentTime = 0;
 
@@ -125,6 +126,14 @@ public class GamePanel extends BasePanel implements Runnable, ComponentListener 
 
             }
 
+            // NPC SNAKE ONLY STARTS MOVING AFTER THE PLAYER HAS STARTED MOVING
+            // isMoving IS SET TO TRUE SO THAT NPC MOVES AND ONLY ONE CALL IS MADE
+            // TO newNPCPath();
+            if (gameSettings.npc && boardPanel.gameStarted() && !boardPanel.npc.isMoving()) {
+                boardPanel.newNPCPath();
+                boardPanel.npc.setMoving(true);
+            }
+
             // IN NORMAL MODE, IF GAME ENDED BECAUSE PLAYER FAILED
             if (isGameOver()) {
                 setEndGame();
@@ -164,6 +173,7 @@ public class GamePanel extends BasePanel implements Runnable, ComponentListener 
 
         currentTime = System.nanoTime();
         delta += (currentTime - lastTime) / drawInterval;
+        deltaNPC += (currentTime - lastTime) / drawInterval;
         lastTime = currentTime;
 
     }
@@ -215,6 +225,15 @@ public class GamePanel extends BasePanel implements Runnable, ComponentListener 
 
     private void updateGame() {
 
+        // npcUpdate IS CONTROLLED BY A BIGGER DELTA IN ORDER TO SLOW DOWN 
+        // IT'S MOVEMENT, OTHERWISE THE NPC IS TOO HARD TO BEAT
+        if (gameSettings.npc && deltaNPC >= 1.5) {
+
+            boardPanel.npcUpdate();
+            deltaNPC -= 1.5;
+
+        }
+
         if (delta >= 1) {
             // THESE UPDATES ARE DEPENDENT ON THE VALUES IN boardStatus
             boardPanel.update();
@@ -240,7 +259,6 @@ public class GamePanel extends BasePanel implements Runnable, ComponentListener 
     }
 
    
-
     public class ScorePanel extends JPanel {
 
         // BACKGROUND IMAGE
@@ -249,6 +267,7 @@ public class GamePanel extends BasePanel implements Runnable, ComponentListener 
         // NORMAL GAME MODE SCORING
         ArrayList<Integer> scores;
         ScoreTable scoreTable;
+        int npcScore;
 
         // ADVENTURE GAME MODE SCORING
         static final int tacoGoal = 20;
@@ -275,9 +294,10 @@ public class GamePanel extends BasePanel implements Runnable, ComponentListener 
                 add(tacoLabel);
                 add(timeLabel);
             } else {
-                scoreTable = new ScoreTable(numberOfSnakes);
+                scoreTable = new ScoreTable(numberOfSnakes, gameSettings.npc);
                 add(scoreTable.getTableInScrolllPane());
                 scores = new ArrayList<Integer>(Collections.nCopies(numberOfSnakes, 0));
+                npcScore = 0;
             }
 
             this.numberOfSnakes = numberOfSnakes;
@@ -309,13 +329,14 @@ public class GamePanel extends BasePanel implements Runnable, ComponentListener 
             
             } else if (boardStatus.hasEaten) {
                 // UPDATE SCORES WHEN AT LEAST ONE SNAKE HAS EATEN AND NOT IN ADVENTURE MODE    
-                updateScores();
+                updateSnakeScores();
+                updateNPCScores();
             
             }
 
         }
 
-        private void updateScores() {
+        private void updateSnakeScores() {
 
             ArrayList<Boolean> snakeFull = boardStatus.snakeFoodStatus;
             for (int snakeIx = 0; snakeIx < snakeFull.size(); snakeIx++) {
@@ -332,6 +353,24 @@ public class GamePanel extends BasePanel implements Runnable, ComponentListener 
                     // RESET FOOD STATUS TO FALSE  
                     boardStatus.snakeFoodStatus.set(snakeIx, false);
                 }
+            }
+
+        }
+
+        private void updateNPCScores() {
+
+            if (boardStatus.npcFoodStatus) {
+
+                // UPDATE SCORE
+                npcScore += boardStatus.points;
+
+                // UPDATE SCORE TABLE, NPC IS ALWAYS LAST ROW
+                scoreTable.setValueAt(Integer.toString(npcScore), 1, 1);
+
+                // RESET FOOD STATUS TO FALSE  
+                boardStatus.npcFoodStatus = false;
+
+
             }
 
         }
@@ -354,6 +393,11 @@ public class GamePanel extends BasePanel implements Runnable, ComponentListener 
         FoodManager foodManager;
         ArrayList<Snake> snakes;
         ArrayList<Boolean> snakeFoodStatus;
+        
+        // FOR NPC SNAKE
+        PathFinder pathFinder;
+        SnakeNPC npc;
+        boolean npcFoodStatus;
 
         public BoardPanel(int mapIndex, int numberOfPlayers) {
 
@@ -364,28 +408,24 @@ public class GamePanel extends BasePanel implements Runnable, ComponentListener 
             board = new Board(this, mapIndex, tilesPerRow, tilesPerCol);
             foodManager = new FoodManager(this);
             foodManager.scaleImages(tileSize, tileSize);
+            pathFinder = new PathFinder();
             snakes = new ArrayList<Snake>();
             snakeFoodStatus = new ArrayList<Boolean>();
 
-            // ADD SNAKES TO BOARD.
+            // ADD USER SNAKES TO BOARD.
             addSnake(3, 8, new String[] {"UP", "DOWN", "RIGHT", "LEFT"});
             if (numberOfPlayers == 2) {
                 addSnake(13, 8, new String[] {"W", "S", "D", "A"});
             }
 
-            // ADD FOOD TO BOARD.
-            addFood();
-
-        }
-
-        public boolean foodIsInSnakeHeadTile() {
-
-            for (Snake snake : snakes) {
-                if (food.row == snake.getHeadRow() && food.col == snake.getHeadCol()) {
-                    return true;
-                }
+            // ADD SNAKE NPC
+            if (gameSettings.npc) {
+                addNPC(13, 8);
             }
-            return false;
+
+            // ADD FOOD TO BOARD. SNAKES NEED TO BE ADDED
+            // BEFORE FOOD.
+            addFood();
 
         }
 
@@ -395,22 +435,24 @@ public class GamePanel extends BasePanel implements Runnable, ComponentListener 
         public int getNumberOfMaps() { return board.getNumberOfMaps(); }
         public Board getBoard() { return board; }
 
-        public void addSnake(int startRow, int startCol, String[] keys) {
+        private void addSnake(int startRow, int startCol, String[] keys) {
 
-            // Add snake to boardpanel
-            // ORDER OF KEYS: UP, DOWN, RIGHT, LEFT
             Snake snake = new Snake(this, startRow, startCol);
+            // ORDER OF KEYS: UP, DOWN, RIGHT, LEFT
             snake.addKeyHandler(keys);    
             snake.scaleImages(tileSize, tileSize);
             snakes.add(snake);
             snakeFoodStatus.add(false);
+            updateBoard(snake);
+            
+        }
 
-            // UPDATE BOARD TILES AS COLLISION. SNAKE'S HEAD TILE POSITION ON THE BOARD
-            // REMAINS SET AS COLLISION FALSE
-            LinkedList<SnakePart> snakeParts = snake.getSnakeParts();
-            for (int partIx = 1; partIx < snakeParts.size(); partIx++) {
-                board.updateCell(snakeParts.get(partIx), true);
-            }
+        private void addNPC(int startRow, int startCol) {
+
+            npc = new SnakeNPC(this, startRow, startCol);
+            npc.scaleImages(tileSize, tileSize);
+            npcFoodStatus = false;
+            updateBoard(npc);
 
         }
 
@@ -419,12 +461,40 @@ public class GamePanel extends BasePanel implements Runnable, ComponentListener 
             // foodUpdate PLACES FOOD IN A RANDOM NO COLLISION TILE. HOWEVER, OCCASIONALLY FOOD IS
             // PLACED IN THE CURRENT HEAD SNAKE POSITION (SINCE HEAD COLLISION IS SET TO FALSE). THIS
             // WHILE LOOP PREVENTS THAT
-
             food = foodManager.updateFood();
             while (foodIsInSnakeHeadTile()) {
                 food = foodManager.updateFood();
             }
             board.addFood(food);
+
+        }
+
+        public boolean foodIsInSnakeHeadTile() {
+
+            // CHECK PLAYER SNAKES
+            for (Snake snake : snakes) {
+                if (food.row == snake.getHeadRow() && food.col == snake.getHeadCol()) {
+                    return true;
+                }
+            }
+
+            // CHECK NPC SNAKE
+            if (gameSettings.npc && food.row == npc.getHeadRow() && food.col == npc.getHeadCol()) {
+                return true;
+            }
+
+            return false;
+
+        }
+
+        private void updateBoard(Snake snake) {
+
+            // UPDATE BOARD TILES AS COLLISION. SNAKE'S HEAD TILE POSITION ON THE BOARD
+            // REMAINS SET AS COLLISION FALSE  
+            LinkedList<SnakePart> snakeParts = snake.getSnakeParts();
+            for (int partIx = 1; partIx < snakeParts.size(); partIx++) {
+                board.updateCell(snakeParts.get(partIx), true);
+            }
 
         }
 
@@ -436,7 +506,14 @@ public class GamePanel extends BasePanel implements Runnable, ComponentListener 
 
             boolean haveEaten = snakesHaveEaten();
             if (haveEaten) {
+                
                 addFood();
+
+                // CALCULATE A PATH FOR NPC TO THE NEW FOOD POSITION
+                if (gameSettings.npc) {
+                    newNPCPath();
+                }
+               
             }
             snakesUpdate();
             boardStatus.update(haveEaten, snakeFoodStatus, food.getPoints());       // NEED TO CHECK THIS FUNCTION
@@ -444,7 +521,8 @@ public class GamePanel extends BasePanel implements Runnable, ComponentListener 
 
         private boolean snakesHaveEaten() {
 
-            // RETURNS TRUE IF AT LEAST ONE SNAKE HAS EATEN THE FOOD
+            // RETURNS TRUE IF AT LEAST ONE SNAKE HAS EATEN THE FOOD,
+            // INCLUDING NPC SNAKE
             boolean oneSnakeAte = false;
             for (int snakeIx = 0; snakeIx < snakes.size(); snakeIx++) {
                 if (snakes.get(snakeIx).ate()) {
@@ -452,16 +530,31 @@ public class GamePanel extends BasePanel implements Runnable, ComponentListener 
                     snakeFoodStatus.set(snakeIx, true);
                 }
             }
+
+            if (gameSettings.npc && npc.ate()) {
+                oneSnakeAte = true;
+                npcFoodStatus = true;
+                boardStatus.npcFoodStatus = true;
+            }
+
             return oneSnakeAte;
 
         }
 
         private void snakesUpdate() {
 
+            // UPDATE ONLY PLAYERS SNAKES
             for (int snakeIx = 0; snakeIx < snakes.size(); snakeIx++) {
                 boolean hasEaten = snakeFoodStatus.get(snakeIx);
                 snakes.get(snakeIx).update(hasEaten);
             }
+
+        }
+
+        public void npcUpdate() {
+
+            npc.update(npcFoodStatus);
+            npcFoodStatus = false;
 
         }
 
@@ -473,22 +566,19 @@ public class GamePanel extends BasePanel implements Runnable, ComponentListener 
 
             super.paintComponent(g);
             Graphics2D g2 = (Graphics2D)g;
-                        
-            // long s = System.nanoTime();
-
             board.draw(g2);
             foodManager.draw(g2);
             drawSnakes(g2);
-
+            if (gameSettings.npc) {
+                npc.draw(g2);
+            }
+            
             // DRAW BEGGINING AND END OF GAME WINDOWS
             if (gameSettings.adventure && gameStatus == hold) {
                 String text = "LEVEL " + Integer.toString(board.getMapIndex() + 1);
                 drawTextWindow(g2, text);
             }
             drawEndWindow(g2);
-           
-            // long e = System.nanoTime();
-            // System.out.println(e-s);
 
             g2.dispose();
 
@@ -559,12 +649,30 @@ public class GamePanel extends BasePanel implements Runnable, ComponentListener 
 
         }
 
+        private void newNPCPath() {
+
+            // COPY THE CURRENT STATE OF THE BOARD
+            boolean[][] boardCopy = Arrays.stream(board.getBoard()).map(boolean[]::clone).toArray(boolean[][]::new);
+
+            // FIND THE SHORTEST PATH TO food
+            pathFinder.loadMatrix(boardCopy);
+            LinkedList<ArrayList<Integer>> pathToFood = pathFinder.findPath(npc.getHeadRow(), npc.getHeadCol(), food.row, food.col);
+            
+            // DISCARD THE FIRST TILE POSITION, IT REPRESENTS THE CURRENT HEAD TILE
+            pathToFood.remove();
+
+            // LOAD THE PATH FOR THE NPC TO FOLLOW
+            npc.loadPath(pathToFood);
+
+        }
+
     }
 
     public class BoardStatus {
 
         public boolean hasEaten = false;
         public ArrayList<Boolean> snakeFoodStatus = new ArrayList<Boolean>();
+        public boolean npcFoodStatus = false;
         public int points = 0;
 
         public void update(boolean hasEaten, ArrayList<Boolean> snakeFoodStatus, int points) {
