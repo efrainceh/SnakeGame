@@ -174,8 +174,6 @@ public class Snake {
 
         // CHANGE THE PREVIOUS TAIL TO SNAKE BODY PART
         setPart("BODY", currentTail.direction, currentTail.row, currentTail.col, snake.size() - 2);
-        
-        board.printBoard();
 
     }
 
@@ -186,23 +184,19 @@ public class Snake {
         Direction bodyDirection = part.getDirection();
         
         // ADDING TO THE BACK OF THE TAIL
-        switch (bodyDirection) {
-            case UP:
-                part.row += 1;
-                break;
-            case DOWN:
-                part.row -= 1;
-                break;
-            case LEFT:
-                part.col += 1;
-                break;
-            case RIGHT:
-                part.col -= 1;
-                break;
-            default:
-                break;
+        if (bodyDirection == Direction.UP || bodyDirection == Direction.UP_RIGHT || bodyDirection == Direction.UP_LEFT) {
+            part.row += 1;
         }
-    
+        if (bodyDirection == Direction.DOWN || bodyDirection == Direction.DOWN_RIGHT || bodyDirection == Direction.DOWN_LEFT) {
+            part.row -= 1;
+        }
+        if (bodyDirection == Direction.LEFT || bodyDirection == Direction.LEFT_UP || bodyDirection == Direction.LEFT_DOWN) {
+            part.col += 1;
+        }
+        if (bodyDirection == Direction.RIGHT || bodyDirection == Direction.RIGHT_UP || bodyDirection == Direction.RIGHT_DOWN) {
+            part.col -= 1;
+        }
+       
         SnakePart newTail = getPart("TAIL", bodyDirection, part.row, part.col);
 
         if (validPosition(newTail)) {
