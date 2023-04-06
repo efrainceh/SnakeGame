@@ -174,12 +174,18 @@ public class Snake {
 
         // CHANGE THE PREVIOUS TAIL TO SNAKE BODY PART
         setPart("BODY", currentTail.direction, currentTail.row, currentTail.col, snake.size() - 2);
+        
+        board.printBoard();
 
     }
 
     private void addNewTail(SnakePart part) {
         
+        int row = part.row;
+        int col = part.col;
         Direction bodyDirection = part.getDirection();
+        
+        // ADDING TO THE BACK OF THE TAIL
         switch (bodyDirection) {
             case UP:
                 part.row += 1;
@@ -198,7 +204,82 @@ public class Snake {
         }
     
         SnakePart newTail = getPart("TAIL", bodyDirection, part.row, part.col);
-        snake.add(newTail);
+
+        if (validPosition(newTail)) {
+            
+            snake.add(newTail);
+            board.updateCell(newTail, true);
+        
+        } else {
+
+            // THIS IS A SAFEGUARD AGAINST THE UNCOMMON CASE OF THE SNAKE GROWING
+            // WHEN ITS TAIL IS NEXT TO THE BORDER, ANOTHER SNAKE, OR A COLLISION TILE.
+            // IF THE SNAKE CAN't GROW TOWARDS ITS "BEHIND" DIRECTION, THEN IT TRIES TO
+            // GROW TO THE SIDES. IF IT CAN'T THEN NOTHING HAPPENS.
+            
+            addPartToTheSide(bodyDirection, row, col);
+            
+        }
+
+    }
+
+    private boolean validPosition(SnakePart part) {
+
+        // PART IS OUT OF THE BOARD
+        if (part.row < 0 || part.row >= gp.getNumberOfRows() || part.col < 0 || part.col >= gp.getNumberOfCols()) {
+            return false;
+        }
+
+        // PART IS IN AN ALREADY OCCUPIED BOARD, EITHER BY SNAKE OF COLLISION TILE
+        if (board.isCollision(part)) {
+            return false;
+        }
+
+        return true;
+
+    }
+
+    private void addPartToTheSide(Direction direction, int row, int col) {
+
+        // IF SNAKE IS MOVING UP OR DOWN, THEN TRY TO GROW LEFT OR RIGHT
+        if (direction == Direction.UP || direction == Direction.DOWN) {
+                
+            SnakePart rightTail = getPart("HEAD", Direction.RIGHT, row, col + 1);
+            SnakePart leftTail = getPart("HEAD", Direction.RIGHT, row, col + 1);
+            
+            if (validPosition(rightTail)) {
+                snake.add(rightTail);
+                board.updateCell(rightTail, true);
+                return;
+            }
+
+            if (validPosition(leftTail)) {
+                snake.add(leftTail);
+                board.updateCell(leftTail, true);
+                return;
+            }
+            
+        }
+
+        //  IF SNAKE IS MOVING LEFT OR RIGHT, THEN TRY TO GROW UP OR DOWN
+        if (direction == Direction.RIGHT || direction == Direction.LEFT) {
+
+            SnakePart upTail = getPart("HEAD", Direction.UP, row - 1, col);
+            SnakePart downTail = getPart("HEAD", Direction.DOWN, row + 1, col);
+            
+            if (validPosition(upTail)) {
+                snake.add(upTail);
+                board.updateCell(upTail, true);
+                return;
+            }
+
+            if (validPosition(downTail)) {
+                snake.add(downTail);
+                board.updateCell(downTail, true);
+                return;
+            }
+
+        }
 
     }
 
