@@ -166,9 +166,21 @@ public class Board {
         for (int row = 0; row < numberOfRows; row++) {
             System.out.print("( ");
             for (int col = 0; col < numberOfCols; col++) {
-                System.out.print((board[row][col]));
+
+                if (board[row][col]) {
+
+                    System.out.print("TRUE ");
+                
+                } else {
+
+                    System.out.print("FALSE");
+                
+                }
+
                 if (col != numberOfCols - 1) {
+                    
                     System.out.print(" , ");
+                
                 } 
             }
             System.out.print(" )");
