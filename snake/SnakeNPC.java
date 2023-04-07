@@ -104,8 +104,7 @@ public class SnakeNPC extends Snake {
     private SnakePart getNewHead(SnakePart head) {
 
         if (pathToFood.isEmpty()) {
-            System.out.println("empty: ");
-            System.out.println(head.direction);
+            
            // CLOCKWISE
             Direction nextDir = null;
             if (head.col + 1 < gp.getNumberOfCols()) {
@@ -117,9 +116,6 @@ public class SnakeNPC extends Snake {
                 return getPart("HEAD", nextDir, head.row + 1, head.col);
             }
             if (head.col - 1 >= 0) {
-                // System.out.println(head.direction);
-                // System.out.println(head.row);
-                // System.out.println(head.col);
                 nextDir = Direction.LEFT;
                 return getPart("HEAD", nextDir, head.row, head.col - 1);
             }
@@ -127,8 +123,6 @@ public class SnakeNPC extends Snake {
                 nextDir = Direction.UP;
                 return getPart("HEAD", nextDir, head.row - 1, head.col);
             }
-
-            
 
         }
 

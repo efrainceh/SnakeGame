@@ -5,6 +5,7 @@ import java.awt.event.ActionListener;
 import javax.swing.*;
 
 import main.*;
+import main.SoundManager.Sound;
 import panels.CardPanel.*;
 import customComponents.GameButton;
 
@@ -30,6 +31,7 @@ public class PlayerPanel extends GridPanel {
 
             @Override
             public void actionPerformed(ActionEvent e) {
+                playSE(Sound.BUTTON);
                 setGameSettings(onePlayer, 0, false);
                 panelHandler.goLevel();
             }
@@ -40,6 +42,7 @@ public class PlayerPanel extends GridPanel {
 
             @Override
             public void actionPerformed(ActionEvent e) {
+                playSE(Sound.BUTTON);
                 setGameSettings(twoPlayer, 0, false);
                 panelHandler.goLevel();
             }
@@ -50,6 +53,7 @@ public class PlayerPanel extends GridPanel {
 
             @Override
             public void actionPerformed(ActionEvent e) {
+                playSE(Sound.BUTTON);
                 setGameSettings(onePlayer, 0, true);
                 panelHandler.goLevel();
             }

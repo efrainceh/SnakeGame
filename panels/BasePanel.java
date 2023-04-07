@@ -4,7 +4,8 @@ import java.awt.*;
 import javax.swing.*;
 
 import main.GameSettings;
-import main.SoundHandler;
+import main.SoundManager;
+import main.SoundManager.Sound;
 import panels.CardPanel.PanelHandler;
 import utilityTool.UtilityTool;
 
@@ -24,7 +25,7 @@ public class BasePanel extends JPanel {
     
     // TOOLS
     UtilityTool utilityTool = new UtilityTool();
-    SoundHandler soundHandler = new SoundHandler();
+    SoundManager soundManager = new SoundManager();
 
     // USED TO HANDLE MOVING BETWEEN PANELS
     PanelHandler panelHandler;
@@ -43,6 +44,26 @@ public class BasePanel extends JPanel {
         this.panelHandler = panelHandler;
         this.gameSettings = gameSettings;
         setPreferredSize(new Dimension(screenWidth, screenHeight));
+
+    }
+
+    protected void playMusic(Sound sound) {
+
+        soundManager.setFile(sound, true);
+        soundManager.playLoop();
+
+    }
+
+    protected void playSE(Sound sound) {
+
+        soundManager.setFile(sound, false);
+        soundManager.playSE();
+
+    }
+
+    protected void stopMusic() {
+
+        soundManager.stopLoop();
 
     }
 

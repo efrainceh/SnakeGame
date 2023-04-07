@@ -5,6 +5,7 @@ import java.awt.event.ActionListener;
 import javax.swing.*;
 
 import main.*;
+import main.SoundManager.Sound;
 import panels.CardPanel.*;
 import customComponents.GameButton;
 
@@ -35,6 +36,7 @@ public class LevelPanel extends GridPanel {
 
             @Override
             public void actionPerformed(ActionEvent e) {
+                playSE(Sound.BUTTON);
                 gameSettings.FBS = slowFBS;
                 addCheckBoxStatus();
                 panelHandler.goGame(gameSettings);
@@ -46,6 +48,7 @@ public class LevelPanel extends GridPanel {
 
             @Override
             public void actionPerformed(ActionEvent e) {
+                playSE(Sound.BUTTON);
                 gameSettings.FBS = mediumFBS;
                 addCheckBoxStatus();
                 panelHandler.goGame(gameSettings);
@@ -57,6 +60,7 @@ public class LevelPanel extends GridPanel {
 
             @Override
             public void actionPerformed(ActionEvent e) {
+                playSE(Sound.BUTTON);
                 gameSettings.FBS = fastFBS;
                 addCheckBoxStatus();
                 panelHandler.goGame(gameSettings);

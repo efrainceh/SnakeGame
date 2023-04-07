@@ -10,6 +10,7 @@ import board.*;
 import customComponents.*;
 import food.*;
 import main.*;
+import main.SoundManager.Sound;
 import snake.*;
 import panels.CardPanel.PanelHandler;
 
@@ -78,7 +79,6 @@ public class GamePanel extends BasePanel implements Runnable, ComponentListener 
     public void componentShown(ComponentEvent e) {
 
         startGameThread();
-        playMusic(0);
         
     }
 
@@ -97,6 +97,7 @@ public class GamePanel extends BasePanel implements Runnable, ComponentListener 
     @Override
     public void run() {
 
+        playMusic(Sound.BACKGROUND);
         setRunInitialSettings();
         
         // GAME LOOP
@@ -195,8 +196,9 @@ public class GamePanel extends BasePanel implements Runnable, ComponentListener 
         gameStatus = gameOver;
         gameThread = null;
         gameSettings.scoreTable = scorePanel.getScoreTable();
-        hold(2);
         stopMusic();
+        playSE(Sound.GAME_OVER);
+        hold(2);
         panelHandler.goEnd(gameSettings);
         
     }
@@ -211,13 +213,15 @@ public class GamePanel extends BasePanel implements Runnable, ComponentListener 
         if (gameSettings.mapIndex < numberOfMaps - 1) {
             gameSettings.mapIndex++;
             gameStatus = nextLevel;
-            hold(2);
             stopMusic();
+            playSE(Sound.NEXT_LEVEL);
+            hold(2);
             panelHandler.goGame(gameSettings);
         } else {
             gameStatus = finished;
-            hold(2);
             stopMusic();
+            playSE(Sound.NEXT_LEVEL);
+            hold(2);
             panelHandler.goEnd(gameSettings);
         }
 
@@ -243,21 +247,6 @@ public class GamePanel extends BasePanel implements Runnable, ComponentListener 
         }
 
     }
-
-    private void playMusic(int soundIx) {
-
-        soundHandler.setFile(soundIx);
-        soundHandler.play();
-        soundHandler.loop();
-
-    }
-
-    private void stopMusic() {
-
-        soundHandler.stop();
-
-    }
-
    
     public class ScorePanel extends JPanel {
 
@@ -507,6 +496,7 @@ public class GamePanel extends BasePanel implements Runnable, ComponentListener 
             boolean haveEaten = snakesHaveEaten();
             if (haveEaten) {
                 
+                playSE(Sound.EAT);
                 addFood();
 
                 // CALCULATE A PATH FOR NPC TO THE NEW FOOD POSITION

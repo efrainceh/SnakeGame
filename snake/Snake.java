@@ -14,6 +14,8 @@ import panels.GamePanel.BoardPanel;
 import snake.SnakePart.Direction;
 import utilityTool.UtilityTool;
 
+
+
 public class Snake {
 
     // LOADING SNAKE PARTS

@@ -5,6 +5,7 @@ import java.awt.event.ActionListener;
 import javax.swing.*;
 
 import main.*;
+import main.SoundManager.Sound;
 import panels.CardPanel.*;
 import customComponents.*;
 
@@ -33,6 +34,7 @@ public class EndPanel extends GridPanel {
 
             @Override
             public void actionPerformed(ActionEvent e) {
+                playSE(Sound.BUTTON);
                 panelHandler.goHome();
             }
 
@@ -42,6 +44,7 @@ public class EndPanel extends GridPanel {
 
             @Override
             public void actionPerformed(ActionEvent e) {
+                playSE(Sound.BUTTON);
                 panelHandler.goGame(gameSettings);
             }
 
@@ -51,6 +54,7 @@ public class EndPanel extends GridPanel {
 
             @Override
             public void actionPerformed(ActionEvent e) {
+                playSE(Sound.BUTTON);
                 System.exit(0);
             }
             
