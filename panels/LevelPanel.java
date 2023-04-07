@@ -28,7 +28,9 @@ public class LevelPanel extends GridPanel {
         setGridPanel(0.20, 0.60);
         addTitle(title);
         addToCenterPanel(new GameButton[]{slowBtn, mediumBtn, fastBtn});
-        if (gameSettings.numberOfPlayers == 1) {
+        
+        // NPC SNAKE ONLY AVAILABLE IN SINGLE, NON-ADVENTURE MODE 
+        if (gameSettings.numberOfPlayers == 1 && !gameSettings.adventure) {
             addToFooter(npc);
         }
         
