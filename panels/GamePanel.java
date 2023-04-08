@@ -54,7 +54,7 @@ public class GamePanel extends BasePanel implements Runnable, ComponentListener 
     private void loadPanel() {
 
         scorePanel = new ScorePanel(gameSettings.numberOfPlayers);
-        boardPanel = new BoardPanel(gameSettings.mapIndex, gameSettings.numberOfPlayers);
+        boardPanel = new BoardPanel(gameSettings);
         boardStatus = new BoardStatus();
         timer = gameSettings.timer;
         add(scorePanel, BorderLayout.EAST);
@@ -388,13 +388,13 @@ public class GamePanel extends BasePanel implements Runnable, ComponentListener 
         SnakeNPC npc;
         boolean npcFoodStatus;
 
-        public BoardPanel(int mapIndex, int numberOfPlayers) {
+        public BoardPanel(GameSettings gameSettings) {
 
             setPreferredSize(new Dimension(boardPanelWidth, screenHeight));
             setDoubleBuffered(true);
             setFocusable(true);
 
-            board = new Board(this, mapIndex, tilesPerRow, tilesPerCol);
+            board = new Board(this, gameSettings.mapIndex, tilesPerRow, tilesPerCol);
             foodManager = new FoodManager(this);
             foodManager.scaleImages(tileSize, tileSize);
             pathFinder = new PathFinder();
@@ -403,7 +403,7 @@ public class GamePanel extends BasePanel implements Runnable, ComponentListener 
 
             // ADD USER SNAKES TO BOARD.
             addSnake(3, 8, new String[] {"UP", "DOWN", "RIGHT", "LEFT"});
-            if (numberOfPlayers == 2) {
+            if (gameSettings.numberOfPlayers == 2) {
                 addSnake(13, 8, new String[] {"W", "S", "D", "A"});
             }
 

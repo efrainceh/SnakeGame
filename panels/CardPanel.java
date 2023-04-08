@@ -42,7 +42,7 @@ public class CardPanel extends BasePanel {
 
         public void goHome() {
 
-            gameSettings.timer.reset();
+            gameSettings.reset();
             cardLayout.show(CardPanel.this, "PLAYER");
 
         }

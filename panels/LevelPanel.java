@@ -76,6 +76,7 @@ public class LevelPanel extends GridPanel {
 
         if (npc.isSelected()) {
             gameSettings.npc = true;
+            npc.setSelected(false);
         }
 
     }
