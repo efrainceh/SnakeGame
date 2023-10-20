@@ -1,21 +1,19 @@
 package board;
 
+import base.Cell;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+@Getter
+@EqualsAndHashCode(callSuper = true)
+@NoArgsConstructor
 public class Tile extends Cell {
 
     public Tile(String path, boolean collision) {
 
+    	super(path);
         this.collision = collision;
-        loadCellImage(path);
-
-    }
-
-    public Tile(String path, boolean collision, int row, int col) {
-
-        this.row = row;
-        this.col = col;
-        this.collision = collision;
-        loadCellImage(path);
 
     }
     

@@ -1,20 +1,24 @@
 package snake;
 
-import board.Cell;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+import base.Cell;
+
+@Getter
+@Setter
+@EqualsAndHashCode(callSuper = true)
+@NoArgsConstructor
 public class SnakePart extends Cell{
 
-    Direction direction;
-    boolean isCorner;
-
-    public SnakePart() { }
+    private Direction direction;
 
     public SnakePart(String path, Direction direction) {
 
-        super();
+    	super(path);
         this.direction = direction;
-        this.isCorner = false;
-        loadCellImage(path);
 
     }
 
@@ -24,51 +28,8 @@ public class SnakePart extends Cell{
         this.col = part.col;
         this.collision = part.collision;
         this.direction = part.direction;
-        this.isCorner = part.isCorner;
         this.img = part.img;
 
-    }
-
-    public Direction getDirection() { return direction; }
-    public void setDirection(Direction direction) { this.direction = direction; }
-
-    public void update(int row, int col) {
-
-        this.row = row;
-        this.col = col;
-
-    }
-
-    public void update(SnakePart part) {
-
-        row = part.row;
-        col = part.col;
-        direction = part.getDirection();
-
-    }
-
-    protected static enum Direction {
-
-        UP,
-        DOWN,
-        RIGHT,
-        LEFT,
-        UP_RIGHT,
-        UP_LEFT,
-        DOWN_RIGHT,
-        DOWN_LEFT,
-        RIGHT_UP,
-        RIGHT_DOWN,
-        LEFT_UP,
-        LEFT_DOWN
-
-    }
-    
-    // FOR DEBUGGING
-    public String toString() {
-
-        return "( " + row + ", " + col + ", " + collision + ", " + direction + " )";
-
-    }
+    } 
 
 }

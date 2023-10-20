@@ -1,37 +1,40 @@
 package panels;
 
 import java.awt.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import javax.swing.*;
 
-import main.GameSettings;
-import main.SoundManager;
-import main.SoundManager.Sound;
+import game.game.GameSettings;
+import handlers.SoundManager;
 import panels.CardPanel.PanelHandler;
-import utilityTool.UtilityTool;
 
-public class BasePanel extends JPanel {
 
-    // GAME PANEL SETTINGS. USED IN BOARDPANEL AND SCOREPANEL
-    static final int originalTileSize = 16;
-    static final int scale = 2;
-    static final int tileSize = originalTileSize * scale;
-    static final int tilesPerRow = 16;
-    static final int tilesPerCol = 16;
-    static final int tilesInScorePanel = 5;
+public abstract class BasePanel extends JPanel {
+
+    private static final long serialVersionUID = 1L;
+	
+	// GAME PANEL SETTINGS. USED IN BOARDPANEL AND SCOREPANEL
+    private static final int originalTileSize = 16;
+    private static final int scale = 2;
+    protected static final int tileSize = originalTileSize * scale;
+    protected static final int tilesPerRow = 16;
+    protected static final int tilesPerCol = 16;
+    protected static final int tilesInScorePanel = 5;
+    
    
     // SCREEN SETTINGS. USED IN ALL PANELS
-    static final int screenHeight = tileSize * tilesPerRow;
-    static final int screenWidth = tileSize * (tilesPerCol + tilesInScorePanel);
+    protected static final int screenHeight = tileSize * tilesPerRow;
+    protected static final int screenWidth = tileSize * (tilesPerCol + tilesInScorePanel);
     
     // TOOLS
-    UtilityTool utilityTool = new UtilityTool();
-    SoundManager soundManager = new SoundManager();
-
-    // USED TO HANDLE MOVING BETWEEN PANELS
-    PanelHandler panelHandler;
-
+    protected SoundManager soundManager = new SoundManager();
+    
     // USED TO PASS INFORMATION BETWEEN PANELS
-    GameSettings gameSettings;
+    protected GameSettings gameSettings = new GameSettings(tileSize, tilesPerRow, tilesPerCol);
+
+    // USED TO MOVE BETWEEN PANELS
+    protected PanelHandler panelHandler;
 
     protected BasePanel() {
 
@@ -46,24 +49,13 @@ public class BasePanel extends JPanel {
         setPreferredSize(new Dimension(screenWidth, screenHeight));
 
     }
-
-    protected void playMusic(Sound sound) {
-
-        soundManager.setFile(sound, true);
-        soundManager.playLoop();
-
-    }
-
-    protected void playSE(Sound sound) {
-
-        soundManager.setFile(sound, false);
-        soundManager.playSE();
-
-    }
-
-    protected void stopMusic() {
-
-        soundManager.stopLoop();
+    
+    protected Image loadImage(String imgPath) {
+  
+    	Path relativePath = Paths.get(imgPath);
+    	Path absolutePath = relativePath.toAbsolutePath();
+    	
+    	return new ImageIcon(absolutePath.toString()).getImage();
 
     }
 

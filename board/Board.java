@@ -6,177 +6,175 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import lombok.Getter;
 
-import main.FolderHandler;
-import panels.GamePanel.BoardPanel;
+import handlers.FolderHandler;
 
+@Getter
 public class Board {
 
-    static final ArrayList<String> mapPaths = loadMapPaths("static/maps");
-    TileManager tileManager = new TileManager();
+	 
+    private TileManager tileManager = new TileManager("static/image/tiles", "png");
 
-    BoardPanel gp;
-    int mapIndex;
-    int numberOfRows;
-    int numberOfCols;
-    int[][] mapTileNum;
-    boolean[][] board;
-    int foodRow;
-    int foodCol;
+    // BOARD VARIABLES
+    private int mapIndex;
+    private final int numberOfRows;
+    private final int numberOfCols;
+    private final int tileSize;
+    private int[][] mapTileNum;
+    private boolean[][] board;
+    private final ArrayList<String> mapPaths;
 
-    public Board(BoardPanel gp, int mapIndex, int rows, int cols) {
+    public Board(int rows, int cols, int tileSize, String folderMap) {
 
-        this.gp = gp;
-        this.mapIndex = mapIndex;
         this.numberOfRows = rows;
         this.numberOfCols = cols;
-        this.mapTileNum = new int[gp.getNumberOfCols()][gp.getNumberOfRows()];
-        this.board = new boolean[gp.getNumberOfCols()][gp.getNumberOfRows()];
-        tileManager.scaleImages(gp.getTileSize(), gp.getTileSize());
-        loadMap(mapIndex);
-        loadBoard();
+        this.tileSize = tileSize;
+        tileManager.scaleImages(tileSize, tileSize);
+        mapPaths = loadMapPaths(folderMap);
+        
+    }
+    
+    public int getNumberOfMaps() { return mapPaths.size(); }
+    
+    public boolean isLastMap() { return mapIndex == mapPaths.size() - 1; }
+    
+    public boolean isCollision(int row, int col) { return board[row][col]; }
+    
+    public void updateCell(int row, int col, boolean collision) { board[row][col] = collision; }
+
+    public void loadMap(int mapIndex) {
+
+        this.mapIndex = mapIndex;
+        mapTileNum = loadMapTile(this.mapIndex);
+        board = loadBoard();
 
     }
+    
+    public void draw(Graphics2D g2) {
 
-    public int getNumberOfMaps() { return mapPaths.size(); }
-    public int getMapIndex() { return mapIndex; }
-    public boolean[][] getBoard() { return board; }
-    public boolean isLastMap() { return mapIndex == mapPaths.size() - 1; }
+        for (int row = 0; row < numberOfRows; row++) {
+        	
+            drawRowOfTiles(g2, row);
+            
+        }
+        
+    }
+    
+    private ArrayList<String> loadMapPaths(String folderPath) {
 
-    private static ArrayList<String> loadMapPaths(String folderPath) {
-
-        FolderHandler folderH = new FolderHandler(folderPath);
-        return folderH.getFilePaths("txt");
+        FolderHandler folderH = new FolderHandler();
+        return folderH.getFilePaths(folderPath, "txt");
     
     }
 
-    private void loadMap(int mapIndex) {
+    private int[][] loadMapTile(int mapIndex) {
+    	
+    	int[][] tempMapTile = new int[numberOfRows][numberOfCols];
 
         try {
+        	
             // OPEN MAP FILE
             String mapPath = mapPaths.get(mapIndex);
             InputStream is = new FileInputStream(mapPath);
             BufferedReader fileReader = new BufferedReader(new InputStreamReader(is));
 
             for (int row = 0; row < numberOfRows; row++) {
+            	
                 // PARSE ONE LINE OF NUMBERS
                 String line = fileReader.readLine();
-                addLineToMapTile(line, row);
+                tempMapTile[row] = convertToInt(line);
+                
             }
 
             fileReader.close();
 
         } catch (Exception e) {
+        	
             e.printStackTrace();
-        }
-    }
-
-    private void addLineToMapTile(String line, int row) {
-
-        for (int col = 0; col < numberOfCols; col++) {
-            String stringNumbers[] = line.split(" ");
-            int numbers = Integer.parseInt(stringNumbers[col]);
-            mapTileNum[col][row] = numbers;
-        }
-
-    }
-
-    private void loadBoard() {
-
-        for (int row = 0; row < numberOfRows; row++) {
-            for (int col = 0; col < numberOfCols; col++) {
-                int tileNum = mapTileNum[col][row];
-                board[row][col] = tileManager.getTile(tileNum).collision;
-            }
-        }
-
-    }
-
-    /* 
-        UPDATE METHODS
-    */
-
-    public boolean isCollision(Cell cell) {
-
-        return board[cell.row][cell.col];
-
-    }
-
-    public boolean isCollision(int row, int col) {
-
-        return board[row][col];
-    
-    }
-
-    public void updateCell(Cell cell, boolean collision) {
-
-        board[cell.row][cell.col] = collision;
-
-    }
-
-    public void updateCell(int row, int col, boolean collision) {
-
-        board[row][col] = collision;
-
-    }
-
-    /* 
-        DRAW METHODS
-    */
-
-    public void draw(Graphics2D g2) {
-
-        for (int row = 0; row < numberOfRows; row++) {
-            drawLineOfTiles(g2, row);
+            
         }
         
+		return tempMapTile;
+		
     }
-
-    private void drawLineOfTiles(Graphics2D g2, int row) {
+    
+    private int[] convertToInt(String line) {
+    	
+    	String stringNumbers[] = line.split(" ");
+    	int[] numLine = new int[numberOfCols];
 
         for (int col = 0; col < numberOfCols; col++) {
-            int tileNum = mapTileNum[col][row];
+        	
+        	numLine[col] = Integer.parseInt(stringNumbers[col]);
+            
+        }
+        
+        return numLine;
+
+    }
+
+    private boolean[][] loadBoard() {
+    	
+    	boolean[][] tempBoard = new boolean[numberOfRows][numberOfCols];
+
+        for (int row = 0; row < numberOfRows; row++) {
+        	
+            for (int col = 0; col < numberOfCols; col++) {
+            	
+                int tileIx = mapTileNum[row][col];
+                tempBoard[row][col] = tileManager.getTile(tileIx).isCollision();
+                
+            }
+            
+        }
+        
+        return tempBoard;
+
+    }
+
+    private void drawRowOfTiles(Graphics2D g2, int row) {
+
+        for (int col = 0; col < numberOfCols; col++) {
+        	
+            int tileNum = mapTileNum[row][col];
             Tile tile = tileManager.getTile(tileNum);
-            int size = gp.getTileSize();
-            g2.drawImage(tile.img, col * size, row * size, null);
+            g2.drawImage(tile.getImg(), col * tileSize, row * tileSize, null);
+            
         }
 
     }
 
     /* 
-        RUNNING GAME METHODS
+    	DEBUGGING
     */
-
-    public void addFood(Cell cell) {
-
-        foodRow = cell.row;
-        foodCol = cell.col;
-
-    }
-
-    public boolean isFood(Cell cell) {
-
-        return foodRow == cell.row && foodCol == cell.col;
-
-    }
-
-    // DEBBUGING
 
     public void printBoard() {
         for (int row = 0; row < numberOfRows; row++) {
             System.out.print("( ");
             for (int col = 0; col < numberOfCols; col++) {
-
-                if (board[row][col]) {
-
-                    System.out.print("TRUE ");
+            	
+            	System.out.print(board[row][col]);
                 
-                } else {
-
-                    System.out.print("FALSE");
+                if (col != numberOfCols - 1) {
+                    
+                    System.out.print(" , ");
                 
-                }
-
+                } 
+            }
+            System.out.print(" )");
+            System.out.println();
+        }
+        System.out.println("--------------------------------------------------------------");
+    }
+    
+    public void printMapTile() {
+        for (int row = 0; row < numberOfRows; row++) {
+            System.out.print("( ");
+            for (int col = 0; col < numberOfCols; col++) {
+            	
+            	System.out.print(mapTileNum[row][col]);
+                
                 if (col != numberOfCols - 1) {
                     
                     System.out.print(" , ");

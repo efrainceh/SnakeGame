@@ -4,19 +4,20 @@ import java.awt.*;
 import java.util.HashMap;
 import javax.swing.*;
 
-import main.GameSettings;
+import game.game.GameScores;
+import game.game.GameSettings;
+
 
 public class CardPanel extends BasePanel {
     
-    static CardLayout cardLayout = new CardLayout();
-    static HashMap<String, JPanel> panelMap = new HashMap<String, JPanel>();
+    private static final long serialVersionUID = -6897273846533231083L;
+    
+	private static CardLayout cardLayout = new CardLayout();
+    private static HashMap<String, JPanel> panelMap = new HashMap<String, JPanel>();
 
     public CardPanel() {
-
-        // INITIALIZE BASE PANEL panelHandler and gameSettings
+    	
         panelHandler = new PanelHandler();
-        gameSettings = new GameSettings();
-        
         setLayout(cardLayout);
         loadInitialPanels();
         
@@ -24,14 +25,14 @@ public class CardPanel extends BasePanel {
 
     private void loadInitialPanels() {
 
-        PlayerPanel playerPanel = new PlayerPanel(panelHandler, gameSettings);
+        ModePanel modePanel = new ModePanel(panelHandler, gameSettings);
         LevelPanel levelPanel = new LevelPanel(panelHandler, gameSettings);
-        GamePanel gamePanel = new GamePanel(panelHandler, gameSettings);
-        EndPanel endPanel = new EndPanel(panelHandler, gameSettings);
-        add(playerPanel, "PLAYER");
+        GamePanel gamePanel = new GamePanel();
+        EndPanel endPanel = new EndPanel();
+        add(modePanel, "MODE");
         add(levelPanel, "LEVEL");
         add(gamePanel, "GAME");
-        panelMap.put("PLAYER", playerPanel);
+        panelMap.put("MODE", modePanel);
         panelMap.put("LEVEL", levelPanel);
         panelMap.put("GAME", gamePanel);
         panelMap.put("END", endPanel);
@@ -42,33 +43,17 @@ public class CardPanel extends BasePanel {
 
         public void goHome() {
 
-            gameSettings.reset();
-            cardLayout.show(CardPanel.this, "PLAYER");
+            cardLayout.show(CardPanel.this, "MODE");
 
         }
 
         public void goLevel() {
 
-            // THIS IS NEEDED BECAUSE THE CHECKBOX IN LEVEL PANEL SHOULD
-            // ONLY APPEAR WHEN THERE IS ONLY ONE PLAYER
-
-            // DELETE THE EXISTING LEVEL PANEL.
-            JPanel currentLevelPanel = panelMap.get("LEVEL");
-            CardPanel.this.remove(currentLevelPanel);
-
-            // CREATE AND LOAD A NEW LEVEL PANEL
-            LevelPanel levelPanel = new LevelPanel(panelHandler, gameSettings);
-            CardPanel.this.add(levelPanel, "LEVEL");
-            panelMap.put("LEVEL", levelPanel);
             cardLayout.show(CardPanel.this, "LEVEL");
 
         }
 
         public void goGame(GameSettings gameSettings) {
-
-            // DELETE THE EXISTING GAME PANEL
-            JPanel currentGamePanel = panelMap.get("GAME");
-            CardPanel.this.remove(currentGamePanel);
 
             // CREATE AND LOAD A NEW GAME PANEL
             GamePanel gamePanel = new GamePanel(panelHandler, gameSettings);
@@ -78,14 +63,14 @@ public class CardPanel extends BasePanel {
 
         }
 
-        public void goEnd(GameSettings gameSettings) {
+        public void goEnd(GameSettings gameSettings, GameScores gameScores) {
 
             // DELETE THE EXISTING END PANEL
             JPanel currentEndPanel = panelMap.get("END");
             CardPanel.this.remove(currentEndPanel);
 
             // CREATE AND LOAD A NEW END PANEL
-            EndPanel endPanel = new EndPanel(this, gameSettings);
+            EndPanel endPanel = new EndPanel(this, gameSettings, gameScores);
             CardPanel.this.add(endPanel, "END");
             panelMap.put("END", endPanel);
             cardLayout.show(CardPanel.this, "END");

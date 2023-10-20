@@ -1,84 +1,56 @@
 package food;
 
-import java.awt.Graphics2D;
 import java.util.ArrayList;
-import java.util.Random;
 
-import board.*;
-import panels.GamePanel.BoardPanel;
-import utilityTool.UtilityTool;
+import base.Manager;
 
-public class FoodManager {
 
-    final UtilityTool utilityTool = new UtilityTool();
-    final static Random random = new Random();
-    static ArrayList<Food> foods = loadFoods();
+public class FoodManager extends Manager {
 
-    BoardPanel gp;
-    Board board;
-    int currentFoodIx;
-
-    public FoodManager(BoardPanel gp) {
-
-        this.gp = gp;
-        this.board = gp.getBoard();
-        currentFoodIx = 0;
-
+    private final ArrayList<Food> foods;
+    
+    public FoodManager(String folderPath, String imgSuffix) {
+    	
+    	foods = loadFoods(folderPath, imgSuffix);
+    	
     }
-
-    public Food getFood() { return foods.get(currentFoodIx); }
-
-    private static ArrayList<Food> loadFoods() {
-
-        ArrayList<Food> tempFoods = new ArrayList<Food>();
-        tempFoods.add(new Food("static/image/food/taco.png", 20));
-        return tempFoods;
-
-    }
-
+    
+    public Food getFood(int foodIx) { return foods.get(foodIx); }
+    
+    public int numberOfFoods() { return foods.size(); }
+    
+    @Override
     public void scaleImages(int width, int height) {
         
         // SCALING THE IMAGES INSIDE EACH FOOD
         for (Food food : foods) {
-            food.img = utilityTool.scaleImage(food.img, width, height);
+        	
+            food.setImg(scaleImage(food.getImg(), width, height));
+            
         }
 
     }
-
-    /* 
-        UPDATE METHODS
-    */
     
-    public Food updateFood() {
-        
-        // SELECT NEW FOOD TYPE
-        currentFoodIx = random.nextInt(foods.size());
+    private ArrayList<Food> loadFoods(String folderPath, String imgSuffix) {
+    	
+    	// GET EACH IMAGE PATH AND DATA FROM THE FOLDER
+    	ArrayList<String> imgPaths = loadFilePaths(folderPath, imgSuffix);
+    	ArrayList<String[]> imgData = loadImgData(folderPath, "txt");
 
-        // GET NEW ROW AND COL COORDINATES
-        int row = random.nextInt(gp.getNumberOfRows());
-        int col = random.nextInt(gp.getNumberOfCols());
-        while (board.isCollision(row, col)) {
-            row = random.nextInt(gp.getNumberOfRows());
-            col = random.nextInt(gp.getNumberOfCols());
+        ArrayList<Food> tempFoods = new ArrayList<Food>();
+        
+        for (int foodIx = 0; foodIx < imgPaths.size(); foodIx++) {
+        	
+        	String[] data = imgData.get(foodIx);
+        	int points = Integer.parseInt(data[1]);
+        	tempFoods.add(new Food(imgPaths.get(foodIx), points));
+        
         }
-
-        // UPDATE FOOD POSITION
-        foods.get(currentFoodIx).row = row;
-        foods.get(currentFoodIx).col = col;
         
-        return foods.get(currentFoodIx);
-    }
- 
-    /* 
-        DRAW METHODS
-    */
-
-    public void draw(Graphics2D g2) {
-
-        Food currentFood = foods.get(currentFoodIx);
-        int size = gp.getTileSize();
-        g2.drawImage(currentFood.img, currentFood.col * size, currentFood.row * size, null);
+        return tempFoods;
 
     }
-
+    
+    
+    
 }

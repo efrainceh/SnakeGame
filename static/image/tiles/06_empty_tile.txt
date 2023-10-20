@@ -1,0 +1,1 @@
+06_empty_tile 0

@@ -2,31 +2,34 @@ package panels;
 
 import java.awt.*;
 import javax.swing.*;
+import lombok.NoArgsConstructor;
 
-import main.GameSettings;
+import game.game.GameSettings;
 import panels.CardPanel.PanelHandler;
 
 
-public class GridPanel extends BasePanel {
+@NoArgsConstructor
+public abstract class GridPanel extends BasePanel {
 
-    // BACKGROUND IMAGE
-    final Image img = utilityTool.loadImage("static/image/components/snake_hat_large.png");
+    private static final long serialVersionUID = 3541508285677812951L;
+
+	// BACKGROUND IMAGE
+    private final Image img = loadImage("static/image/components/snake_hat_large.png");
  
     // SCREEN LAYOUT. ONLY USED WHEN setGridPanel IS CALLED.
-    JPanel titlePanel;
-    JPanel centerPanel;
-    JPanel footPanel;
-    GridBagConstraints gbc;
+    private JPanel titlePanel;
+    private JPanel centerPanel;
+    private JPanel footPanel;
+    private GridBagConstraints gbc;
 
-    protected GridPanel() {};
-
-    protected GridPanel(PanelHandler panelHandler, GameSettings gameSettings) {
+    protected GridPanel(PanelHandler panelHandler, GameSettings gameSettings, double titleWeighty, double centerWeighty) {
 
         super(panelHandler, gameSettings);
+        setGrid(titleWeighty, centerWeighty);
         
     }
 
-    public void setGridPanel(double titleWeighty, double centerWeighty) {
+    private void setGrid(double titleWeighty, double centerWeighty) {
 
         setLayout(new GridBagLayout());
         gbc = new GridBagConstraints();
@@ -61,32 +64,27 @@ public class GridPanel extends BasePanel {
 
     }
 
-    public void addTitle(JLabel title) {
+    protected final void addTitle(JLabel title) {
 
         title.setFont(new Font("PixelMplus12", Font.BOLD, 40));
         title.setForeground(Color.GREEN);
-        addToTitlePanel(title);
+        titlePanel.add(title);
 
     }
-
-    public void addToTitlePanel(JComponent component) {
+    
+    protected final void addToTitlePanel(JComponent component) {
         
-        if (titlePanel == null) {
-            return;                  // NEED TO HANDLE THROW HERE
-        }
         titlePanel.add(component);
+
     }
 
-    public void addToCenterPanel(JComponent[] componentArray) {
+    protected final void addToCenterPanel(JComponent[] componentArray) {
         
-        if (centerPanel == null) {
-            return;                  // NEED TO HANDLE THROW HERE
-        }
-
         GridBagConstraints panelConstraints = new GridBagConstraints();
         float weight = 1 / componentArray.length;
         Insets space = new Insets(15, 0, 15, 0);
         for (int i = 0; i < componentArray.length; i++) {
+        	
             panelConstraints.gridx = 0;
             panelConstraints.gridy = i;
             panelConstraints.weighty = weight;
@@ -94,22 +92,22 @@ public class GridPanel extends BasePanel {
             panelConstraints.insets = space; 
             centerPanel.add(componentArray[i], panelConstraints);
             panelConstraints.insets = space; 
+            
         }
 
     }
 
-    public void addToFooter(JComponent component) {
+    protected final void addToFooterPanel(JComponent component) {
 
-        if (footPanel == null) {
-            return;                  // NEED TO HANDLE THROW HERE
-        }
         footPanel.add(component);
 
     }
 
     public void paintComponent(Graphics g) {
+    	
         g.drawImage(img,(int)(screenWidth * 0.6), (int)(screenHeight * 0.30), null);
         g.drawImage(img,(int)(screenWidth * 0.0), (int)(screenHeight * 0.30), null);
+        
     }
 
     

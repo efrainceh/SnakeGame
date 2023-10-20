@@ -1,33 +1,23 @@
 package food;
 
-import board.Cell;
+import base.Cell;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+@Getter
+@EqualsAndHashCode(callSuper = true)
+@NoArgsConstructor
 public class Food extends Cell{
 
-    int points;
+    private int points = 0;
     
     public Food(String path, int points) {
         
-        this.points = points;
-        loadCellImage(path);
+        super(path);
+    	this.points = points;
 
     }
 
-    public Food(int row, int col) {
-        
-        super(row, col);
-        this.points = 0;
-    }
-
-    public int getPoints() { return points; }
-
-    public void update(String path, int points, int row, int col) {
-        
-        this.points = points;
-        this.row = row;
-        this.col = col;
-        loadCellImage(path);
-        
-    }
 
 }
