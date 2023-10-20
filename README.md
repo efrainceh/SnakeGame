@@ -8,9 +8,12 @@ Java implementation of the popular SnakeGame, with tacos! A single player can pl
 - **Snake**: 6 fbs
 - **Falcon**: 12 fbs
 
+![speed_panel](/images/speed_panel.jpg)
+
 ### NPC
 
-The NPC can only be added when in Single player mode. The NPC moves at half the speed
+The NPC can only be added when in Single player mode. The NPC moves at half the speed, otherwise it is basically unbeatable.
+
 
 ## Installation
 
