@@ -9,7 +9,6 @@ Java implementation of the popular SnakeGame, with tacos! A single player can pl
 - **Adventure**: One player moves along five different maps of increased difficulty. Player moves to next map after 20 tacos.
 - **NPC**: The NPC mode can only be added for the One Player mode. The NPC uses Dijkstra's algorithm to find the shortest path to the taco, and it moves at half the speed - otherwise it is basically unbeatable.
 
-![mode_panel](/images/mode_panel.jpg)
 
 ### Speed Panel
 
