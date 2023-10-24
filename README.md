@@ -2,6 +2,19 @@
 
 Java implementation of the popular SnakeGame, with tacos! A single player can play Adventure mode or versus a NPC. There is also the option for two players to go against one another and three speed settings.
 
+## Installation
+
+Download all files and run Main.java
+
+## How to Use
+
+Snakes are controlled with the keyboard.
+
+- **Player 1**: UP, DOWN, LEFT, and RIGHT keys
+- **Player 2**: W, S, A, and D keys 
+
+## Game
+
 ### Mode Panel
 
 - **One Player**: Normal mode where the player can continue to eat tacos and grow until there's a clash.
@@ -21,14 +34,10 @@ Java implementation of the popular SnakeGame, with tacos! A single player can pl
 
 ### Adventure Maps
 
+![level_1](/images/level_1.jpg)
+![level_2](/images/level_2.jpg)
+![level_3](/images/level_3.jpg)
+![level_4](/images/level_4.jpg)
+![level_5](/images/level_5.jpg)
 
-## Installation
 
-Download all files and run Main.java
-
-## How to Use
-
-Snakes are controlled with the keyboard.
-
-- **Player 1**: UP, DOWN, LEFT, and RIGHT keys
-- **Player 2**: W, S, A, and D keys 
