@@ -19,10 +19,12 @@ Java implementation of the popular SnakeGame, with tacos! A single player can pl
 
 ![speed_panel](/images/speed_panel.jpg)
 
+### Adventure Maps
+
 
 ## Installation
 
-
+Download all files and run Main.java
 
 ## How to Use
 
