@@ -18,7 +18,7 @@ public class GameSettings {
 	// GAME VARIABLES
     private int numberOfPlayers = 1;
     private int FBS = 4;
-    private final int adventureGoal = 1;
+    private final int adventureGoal = 20;
     
     // MODE VARIABLES
     private GameMode gameMode = GameMode.NORMAL;
